@@ -1,53 +1,83 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+
 import { removeContact } from '../../store/contacts/contactsSlice';
 import { visibleContacts } from '../../store/contacts/contactsSelectors';
 import { getContacts } from '../../store/contacts/contactsSlice';
 
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
+import CustomAlert from '../CustomAlert';
 
-class ContactList extends Component {
-	componentDidMount() {
-		this.props.getContacts();
-	}
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 
-	render() {
-		return (
-			<List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
-				{this.props.contacts.map(({ id, name, phone }) => {
-					return (
-						<ListItem key={id}>
-							<ListItemAvatar>
-								<Avatar />
-							</ListItemAvatar>
-							<ListItemText primary={name} secondary={phone} />
-							<Button
-								variant='outlined'
-								color='error'
-								onClick={() => this.props.onDelete(id)}
+const ContactList = () => {
+	const [open, setOpen] = useState(false);
+	const dispatch = useDispatch();
+
+	const contacts = useSelector(visibleContacts);
+
+	useEffect(() => {
+		dispatch(getContacts());
+	}, [dispatch]);
+
+	const onContactDelete = id => {
+		dispatch(removeContact(id));
+		setOpen(true);
+	};
+
+	const handleClose = (event, reason) => {
+		if (reason === 'clickaway') {
+			return;
+		}
+		setOpen(false);
+	};
+
+	return (
+		<>
+			<TableContainer component={Paper}>
+				<Table sx={{ minWidth: 650 }} size='small' aria-label='a dense table'>
+					<TableBody>
+						{contacts.map(({ id, name, phone }) => (
+							<TableRow
+								key={IdleDeadline}
+								sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
 							>
-								Delete
-							</Button>
-						</ListItem>
-					);
-				})}
-			</List>
-		);
-	}
-}
+								<TableCell>
+									<Avatar />
+								</TableCell>
+								<TableCell component='th' scope='row'>
+									{name}
+								</TableCell>
+								<TableCell align='left'>{phone}</TableCell>
+								<TableCell align='right'>
+									<Button
+										variant='outlined'
+										color='error'
+										onClick={() => onContactDelete(id)}
+									>
+										Delete
+									</Button>
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</TableContainer>
 
-const mapStateToProps = state => ({
-	contacts: visibleContacts(state),
-});
+			<CustomAlert
+				open={open}
+				handleClose={handleClose}
+				type='warning'
+				message='Contact successfully deleted!'
+			/>
+		</>
+	);
+};
 
-const mapDispatchToProps = dispatch => ({
-	onDelete: id => dispatch(removeContact(id)),
-	getContacts: () => dispatch(getContacts()),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(ContactList);
+export default ContactList;

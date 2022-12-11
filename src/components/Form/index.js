@@ -1,87 +1,108 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import React from 'react';
+import { useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
+import CustomAlert from '../CustomAlert';
 
 import { addNewContact } from '../../store/contacts/contactsSlice';
 
-class Form extends Component {
-	state = {
-		name: '',
-		phone: '',
-	};
+const Form = () => {
+	const [name, setName] = useState('');
+	const [phone, setPhone] = useState('');
+	const [open, setOpen] = useState(false);
 
-	onNameInput = event => {
+	const dispatch = useDispatch();
+
+	const onNameInput = event => {
 		const { name, value } = event.currentTarget;
-		this.setState({ [name]: value });
+
+		switch (name) {
+			case 'name':
+				setName(value);
+				break;
+			case 'phone':
+				setPhone(value);
+				break;
+			default:
+				return;
+		}
 	};
 
-	onFormSubmit = event => {
+	const onFormSubmit = event => {
 		event.preventDefault();
 
 		const contact = {
 			id: 0,
-			name: this.state.name,
-			phone: this.state.phone,
+			name: name,
+			phone: phone,
 		};
 
-		this.props.onSubmit(contact);
+		if (name !== '' && phone !== '') {
+			dispatch(addNewContact(contact));
+			setOpen(true);
+		} else {
+			alert('Please fill the inputs!');
+		}
 
-		this.setState({ name: '', phone: '' });
+		setName('');
+		setPhone('');
 	};
 
-	render() {
-		return (
-			<Container component='main' maxWidth='xs'>
-				<Box
-					component='form'
-					onSubmit={this.onFormSubmit}
-					noValidate
-					sx={{ mt: 1 }}
+	const handleClose = (event, reason) => {
+		if (reason === 'clickaway') {
+			return;
+		}
+		setOpen(false);
+	};
+
+	return (
+		<Container component='main' maxWidth='xs'>
+			<Box component='form' onSubmit={onFormSubmit} noValidate sx={{ mt: 1 }}>
+				<TextField
+					margin='normal'
+					required
+					fullWidth
+					id='name'
+					label='Name'
+					name='name'
+					autoComplete='name'
+					autoFocus
+					value={name}
+					onChange={onNameInput}
+				/>
+				<TextField
+					margin='normal'
+					required
+					fullWidth
+					name='phone'
+					label='Phone'
+					type='phone'
+					id='phone'
+					autoComplete='phone'
+					value={phone}
+					onChange={onNameInput}
+				/>
+				<Button
+					type='submit'
+					fullWidth
+					variant='contained'
+					sx={{ mt: 3, mb: 2 }}
 				>
-					<TextField
-						margin='normal'
-						required
-						fullWidth
-						id='name'
-						label='Name'
-						name='name'
-						autoComplete='name'
-						autoFocus
-						value={this.state.name}
-						onChange={this.onNameInput}
-					/>
-					<TextField
-						margin='normal'
-						required
-						fullWidth
-						name='phone'
-						label='Phone'
-						type='phone'
-						id='phone'
-						autoComplete='phone'
-						value={this.state.phone}
-						onChange={this.onNameInput}
-					/>
-					<Button
-						type='submit'
-						fullWidth
-						variant='contained'
-						sx={{ mt: 3, mb: 2 }}
-					>
-						Add contact
-					</Button>
-				</Box>
-			</Container>
-		);
-	}
-}
+					Add contact
+				</Button>
+				<CustomAlert
+					open={open}
+					handleClose={handleClose}
+					type='success'
+					message='Contact successfully created!'
+				/>
+			</Box>
+		</Container>
+	);
+};
 
-const mapDispatchToProps = dispatch => ({
-	onSubmit: contact => dispatch(addNewContact(contact)),
-});
-
-export default connect(null, mapDispatchToProps)(Form);
+export default Form;
