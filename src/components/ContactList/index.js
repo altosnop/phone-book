@@ -45,7 +45,7 @@ const ContactList = () => {
 					<TableBody>
 						{contacts.map(({ id, name, phone }) => (
 							<TableRow
-								key={IdleDeadline}
+								key={id}
 								sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
 							>
 								<TableCell>
