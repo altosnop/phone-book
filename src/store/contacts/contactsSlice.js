@@ -2,6 +2,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import onNameCheck from '../../service/onNameCheck';
 import axios from 'axios';
 
+const KEY = process.env.REACT_APP_MOCK_API_KEY;
+
 const initialState = {
 	items: [],
 	filter: '',
@@ -10,9 +12,7 @@ const initialState = {
 export const getContacts = createAsyncThunk(
 	'contacts/getContacts',
 	async () => {
-		const response = await axios.get(
-			'https://638e13324190defdb755a833.mockapi.io/app/contacts'
-		);
+		const response = await axios.get(`https://${KEY}.mockapi.io/app/contacts`);
 		return response.data;
 	}
 );
@@ -21,9 +21,7 @@ export const removeContact = createAsyncThunk(
 	'contacts/removeContact',
 	async (id, { rejectWithValue, dispatch }) => {
 		try {
-			await axios.delete(
-				`https://638e13324190defdb755a833.mockapi.io/app/contacts/${id}`
-			);
+			await axios.delete(`https://${KEY}.mockapi.io/app/contacts/${id}`);
 
 			dispatch(deleteContact(id));
 		} catch (error) {
@@ -41,7 +39,7 @@ export const addNewContact = createAsyncThunk(
 
 			if (!contain) {
 				const response = await axios.post(
-					'https://638e13324190defdb755a833.mockapi.io/app/contacts',
+					`https://${KEY}.mockapi.io/app/contacts`,
 					contact
 				);
 
